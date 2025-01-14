@@ -41,7 +41,8 @@ puppeteer.use(StealthPlugin());
   await page.waitForSelector('.fc-button.fc-cta-consent.fc-primary-button') // Butonun görünmesini bekler
   await page.click('.fc-button.fc-cta-consent.fc-primary-button') // Butona tıklar
 
-  console.warn('Consent butonuna tıklandı!')
+  print('Consent butonuna tıklandı!')
+  await sleep(1)
 
   // Rastgele 7 haneli bir karakter dizisi oluştur
   const randomUsername = Math.random().toString(36).substring(2, 9) // 7 haneli bir string oluştur
@@ -51,48 +52,50 @@ puppeteer.use(StealthPlugin());
   await page.waitForSelector('input[name="user"]') // Username input alanını bekle
   await page.type('input[name="user"]', randomUsername) // Rastgele Username yaz
 
-  console.warn(`Username input alanına şu değer yazıldı: ${randomUsername}`)
+  print(`Username input alanına şu değer yazıldı: ${randomUsername}`)
 
   // Password inputunu bekle ve rastgele metni yaz
   await page.waitForSelector('input[name="pass"]') // Password input alanını bekle
   await page.type('input[name="pass"]', randomPassword) // Rastgele Password yaz
 
-  console.warn(`Password input alanına şu değer yazıldı: ${randomPassword}`)
+  print(`Password input alanına şu değer yazıldı: ${randomPassword}`)
 
   // Tarayıcıda reCAPTCHA çözümü için bekleyin
-  console.warn('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın')
+  print('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın')
   await new Promise(resolve => setTimeout(resolve, 30 * 1000)) // 30 saniye bekler
 
-  console.warn('Bekleme süresi sona erdi.')
-
   // URL'nin açılmasını bekle
-  console.warn('Yeni URL bekleniyor...')
+  print('Yeni URL bekleniyor...')
   await page.waitForFunction(
     'window.location.href === "https://www.vpnjantit.com/create-free-account?type=OpenVPN&server=gr1#create"',
   )
-  console.warn('URL açıldı!')
+  print('URL açıldı!')
 
   // "Download Config V2 udp-2500.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
-  console.warn('Download Config V2 udp-2500.ovpn butonuna tıklandı!')
+  print('Download Config V2 udp-2500.ovpn butonuna tıklandı!')
+
+  await sleep(3)
 
   // "Download Config V2 tcp-2501.ovpn" butonuna tıkla
-  await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]')
+  await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]', { timeout: 0 })
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]')
-  console.warn('Download Config V2 tcp-2501.ovpn butonuna tıklandı!')
+  print('Download Config V2 tcp-2501.ovpn butonuna tıklandı!')
 
-  console.warn(`Dosyalar "${downloadPath}" dizinine indirildi.`)
+  await sleep(3)
+
+  print(`Dosyalar "${downloadPath}" dizinine indirildi.`)
 
   // Platforma göre indirilen klasörü aç
   switch (os.platform()) {
     case 'darwin': // macOS
       exec(`open ${downloadPath}`, (err) => {
         if (err) {
-          console.error('MacOS için klasör açılamadı:', err)
+          print('MacOS için klasör açılamadı:', err)
         }
         else {
-          console.warn('MacOS: İndirilen klasör açıldı.')
+          print('MacOS: İndirilen klasör açıldı.')
         }
       })
       break
@@ -100,10 +103,10 @@ puppeteer.use(StealthPlugin());
     case 'win32': // Windows
       exec(`explorer ${downloadPath}`, (err) => {
         if (err) {
-          console.error('Windows için klasör açılamadı:', err)
+          print('Windows için klasör açılamadı:', err)
         }
         else {
-          console.warn('Windows: İndirilen klasör açıldı.')
+          print('Windows: İndirilen klasör açıldı.')
         }
       })
       break
@@ -111,23 +114,31 @@ puppeteer.use(StealthPlugin());
     case 'linux': // Linux
       exec(`xdg-open ${downloadPath}`, (err) => {
         if (err) {
-          console.error('Linux için klasör açılamadı:', err)
+          print('Linux için klasör açılamadı:', err)
         }
         else {
-          console.warn('Linux: İndirilen klasör açıldı.')
+          print('Linux: İndirilen klasör açıldı.')
         }
       })
       break
 
     default: // Desteklenmeyen platform
-      console.warn('Desteklenmeyen platform. Klasör açma işlemi yapılmadı.')
+      print('Desteklenmeyen platform. Klasör açma işlemi yapılmadı.')
       break
   }
 
-  console.warn('10 saniye sonra tarayıcı kapanacak...')
-  await new Promise(resolve => setTimeout(resolve, 10 * 1000)) // 10 saniye bekler
+  print('5 saniye sonra tarayıcı kapanacak...')
+  await sleep(5)
 
   // Tarayıcıyı kapat
   await browser.close()
-  console.warn('Tarayıcı kapatıldı, işlem tamam.')
+  print('Tarayıcı kapatıldı, işlem tamam.')
 })()
+
+function sleep(second) {
+  return new Promise(resolve => setTimeout(resolve, second * 1000))
+}
+
+function print(message) {
+  console.warn(`[vpnver] ${message}`)
+}
