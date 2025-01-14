@@ -12,7 +12,9 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "puppeteer": "^24.0.0"
+    "puppeteer": "^24.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.14.0",
