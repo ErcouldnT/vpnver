@@ -53,6 +53,7 @@
     "inputunu",
     "modunu",
     "networkidle",
-    "ovpn"
+    "ovpn",
+    "vpnver"
   ]
 }

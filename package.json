@@ -2,10 +2,13 @@
   "name": "vpn-ver",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
-  "author": "",
+  "description": "free openvpn account",
+  "author": "ercode",
   "license": "ISC",
   "main": "index.js",
+  "bin": {
+    "vpnver": "./index.js"
+  },
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",

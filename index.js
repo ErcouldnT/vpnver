@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
 import puppeteer from 'puppeteer-extra'
@@ -15,7 +16,7 @@ puppeteer.use(StealthPlugin());
   const page = await browser.newPage()
 
   // İndirme klasörünü ayarla
-  const downloadPath = path.resolve('./downloads')
+  const downloadPath = path.resolve('./Downloads')
   if (!fs.existsSync(downloadPath)) {
     fs.mkdirSync(downloadPath)
   }
@@ -58,7 +59,7 @@ puppeteer.use(StealthPlugin());
 
   // Tarayıcıda reCAPTCHA çözümü için bekleyin
   console.warn('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın')
-  await new Promise(resolve => setTimeout(resolve, 60000)) // 60 saniye bekler
+  await new Promise(resolve => setTimeout(resolve, 30 * 1000)) // 30 saniye bekler
 
   console.warn('Bekleme süresi sona erdi.')
 
@@ -81,6 +82,10 @@ puppeteer.use(StealthPlugin());
 
   console.warn(`Dosyalar "${downloadPath}" dizinine indirildi.`)
 
+  console.warn('10 saniye sonra tarayıcı kapanacak...')
+  await new Promise(resolve => setTimeout(resolve, 10 * 1000)) // 10 saniye bekler
+
   // Tarayıcıyı kapat
   await browser.close()
+  console.warn('Tarayıcı kapatıldı, işlem tamam.')
 })()
