@@ -1,5 +1,7 @@
 #!/usr/bin/env node
+import { exec } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
@@ -81,6 +83,46 @@ puppeteer.use(StealthPlugin());
   console.warn('Download Config V2 tcp-2501.ovpn butonuna tıklandı!')
 
   console.warn(`Dosyalar "${downloadPath}" dizinine indirildi.`)
+
+  // Platforma göre indirilen klasörü aç
+  switch (os.platform()) {
+    case 'darwin': // macOS
+      exec(`open ${downloadPath}`, (err) => {
+        if (err) {
+          console.error('MacOS için klasör açılamadı:', err)
+        }
+        else {
+          console.warn('MacOS: İndirilen klasör açıldı.')
+        }
+      })
+      break
+
+    case 'win32': // Windows
+      exec(`explorer ${downloadPath}`, (err) => {
+        if (err) {
+          console.error('Windows için klasör açılamadı:', err)
+        }
+        else {
+          console.warn('Windows: İndirilen klasör açıldı.')
+        }
+      })
+      break
+
+    case 'linux': // Linux
+      exec(`xdg-open ${downloadPath}`, (err) => {
+        if (err) {
+          console.error('Linux için klasör açılamadı:', err)
+        }
+        else {
+          console.warn('Linux: İndirilen klasör açıldı.')
+        }
+      })
+      break
+
+    default: // Desteklenmeyen platform
+      console.warn('Desteklenmeyen platform. Klasör açma işlemi yapılmadı.')
+      break
+  }
 
   console.warn('10 saniye sonra tarayıcı kapanacak...')
   await new Promise(resolve => setTimeout(resolve, 10 * 1000)) // 10 saniye bekler
