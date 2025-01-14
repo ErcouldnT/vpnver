@@ -1,15 +1,23 @@
 {
   "name": "vpn-ver",
+  "type": "module",
   "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint . --fix"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  },
   "devDependencies": {
+    "@antfu/eslint-config": "^3.14.0",
+    "eslint": "^9.18.0",
+    "eslint-plugin-format": "^1.0.1",
     "nodemon": "^3.1.9"
   }
 }
