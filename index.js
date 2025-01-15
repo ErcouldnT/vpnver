@@ -9,37 +9,32 @@ import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
-// Stealth modunu Puppeteer'a ekle
-puppeteer.use(StealthPlugin())
+puppeteer.use(StealthPlugin()) // Bot olarak algılamayı önle
+puppeteer.use(AdblockerPlugin({ blockTrackers: true })) // Reklamları engelle
 
-// AdBlocker eklentisini Puppeteer'a ekle
-puppeteer.use(AdblockerPlugin({ blockTrackers: true }))
+const serverArg = chooseServerFromTerminal() // Default olarak "gr1"
+const __dirname = path.dirname(fileURLToPath(import.meta.url)) // ES Modules için __dirname değişkeni
 
-// Terminalden sunucu seçme işlemi
-const args = process.argv.slice(2)
-
-// Argüman verilmemişse varsayılan olarak "gr1" kullan
-const serverArg = args[0] || 'gr1'
-print(`Sunucu tespit edildi: ${serverArg}`)
-
-const vpnUrl = `https://www.vpnjantit.com/create-free-account?type=OpenVPN&server=${serverArg}`
-const __dirname = path.dirname(fileURLToPath(import.meta.url)) // ES Modules için __dirname
-const COOKIES_PATH = path.resolve(__dirname, 'cookies.json') // Çerezlerin kaydedileceği dosya
+// Sabitler
+const VPN_URL = `https://www.vpnjantit.com/create-free-account?type=OpenVPN&server=${serverArg}`
+const COOKIES_PATH = path.resolve(__dirname, 'cookies.json') // Çerez dosyası
 const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasörü
 
 (async () => {
+  // Tarayıcıyı aç
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: false, // Tarayıcı görünür olsun
     args: ['--disable-blink-features=AutomationControlled'],
   })
 
+  // Yeni sekme aç
   const page = await browser.newPage()
 
   // Çerezleri yükle
   if (fs.existsSync(COOKIES_PATH)) {
     const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf8'))
     await page.setCookie(...cookies)
-    print('Çerezler yüklendi, reCAPTCHA atlanabilir.')
+    print('Çerezler yüklendi, reCAPTCHA kolay geçilebilir.')
   }
 
   // İndirme klasörünü ayarla
@@ -48,6 +43,7 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
     fs.mkdirSync(downloadPath)
   }
 
+  // İndirme izinlerini ayarla
   const client = await page.createCDPSession()
   await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
@@ -58,59 +54,52 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
   await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:135.0) Gecko/20100101 Firefox/135.0')
 
   // Siteye git
-  await page.goto(vpnUrl, {
-    waitUntil: 'networkidle2', // Tüm ağ istekleri tamamlanana kadar bekler
+  await page.goto(VPN_URL, {
+    waitUntil: 'networkidle2', // Sayfa tamamen yüklenene kadar bekle
   })
 
   // Rastgele 7 haneli bir karakter dizisi oluştur
-  const randomUsername = Math.random().toString(36).substring(2, 9) // 7 haneli bir string oluştur
-  const randomPassword = Math.random().toString(36).substring(2, 9) // 7 haneli bir string oluştur
+  const randomUsername = Math.random().toString(36).substring(2, 9)
+  const randomPassword = Math.random().toString(36).substring(2, 9)
 
   // Username inputunu bekle ve rastgele metni yaz
-  await page.waitForSelector('input[name="user"]', { timeout: 0 }) // Username input alanını bekle
-  await page.type('input[name="user"]', randomUsername) // Rastgele Username yaz
-
+  await page.waitForSelector('input[name="user"]', { timeout: 0 })
+  await page.type('input[name="user"]', randomUsername)
   print(`OpenVPN Username: ${randomUsername}`)
 
   // Password inputunu bekle ve rastgele metni yaz
-  await page.waitForSelector('input[name="pass"]', { timeout: 0 }) // Password input alanını bekle
-  await page.type('input[name="pass"]', randomPassword) // Rastgele Password yaz
-
+  await page.waitForSelector('input[name="pass"]', { timeout: 0 })
+  await page.type('input[name="pass"]', randomPassword)
   print(`OpenVPN Password: ${randomPassword}`)
 
   // Manuel reCAPTCHA çözme sürecine devam et
-  print('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın')
-
-  // URL'nin açılmasını bekle
-  print('Yeni URL bekleniyor...')
+  print('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın.')
   await page.waitForFunction(
-    `window.location.href === "${vpnUrl}#create"`,
+    `window.location.href === "${VPN_URL}#create"`,
     { timeout: 0 },
   )
 
-  print('reCAPTCHA çözüldü, çerezler kaydediliyor...')
-
   // Çerezleri kaydet
+  print('reCAPTCHA çözüldü, çerezler kaydediliyor...')
   const cookies = await page.cookies()
   fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2))
 
   // "Download Config V2 udp-2500.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
-  print('Download Config V2 udp-2500.ovpn butonuna tıklandı!')
-
-  await sleep(2)
+  print('udp-2500.ovpn indiriliyor...')
+  await sleep(1)
 
   // "Download Config V2 tcp-2501.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]', { timeout: 0 })
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]')
-  print('Download Config V2 tcp-2501.ovpn butonuna tıklandı!')
+  print('tcp-2501.ovpn indiriliyor...')
+  await sleep(1)
 
-  await sleep(2)
-  print(`Dosyalar "${downloadPath}" dizinine indirildi.`)
-
+  // İndirilen dosyaları göster
   openDownloadsFolder(downloadPath)
 
+  // Tarayıcıyı kapat
   await browser.close()
   print('Tarayıcı kapatıldı, işlem tamam.')
 })()
@@ -125,8 +114,18 @@ function print(message) {
   console.warn(`[vpnver] ${message}`)
 }
 
+// Terminalden sunucu seçme işlemi
+function chooseServerFromTerminal() {
+  const args = process.argv.slice(2)
+  const serverArg = args[0] || 'gr1' // Varsayılan olarak "Germany 1"
+  print(`Sunucu tespit edildi: ${serverArg}`)
+  return serverArg
+}
+
 // Platforma göre indirilen klasörü aç
 function openDownloadsFolder(downloadPath) {
+  print(`Dosyalar "${downloadPath}" dizinine indirildi.`)
+
   switch (os.platform()) {
     case 'darwin': // macOS
       exec(`open ${downloadPath}`, (err) => {
