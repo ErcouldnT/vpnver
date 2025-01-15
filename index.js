@@ -35,33 +35,6 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
 
   const page = await browser.newPage()
 
-  // Sayfadaki tüm dialog elementlerini kaldır
-  async function removeAdsAndElements() {
-    await page.evaluate(() => {
-      // Dialog ve overlay seçicilerini belirle
-      const elementsToRemove = [
-        'dialog',
-        '[role="dialog"]',
-        '.dialog',
-        '.modal',
-        '.popup',
-        '.fc-monetization-dialog-container',
-        '.fc-dialog-overlay',
-        'iframe[src*="doubleclick.net"]', // DoubleClick reklam iframe
-        'iframe[src*="googleads.g.doubleclick.net"]', // Google Ads iframe
-        '.adsbygoogle', // Google reklam ögeleri
-      ]
-      // Tüm seçicilere göre elemanları bul ve kaldır
-      elementsToRemove.forEach((selector) => {
-        const elements = document.querySelectorAll(selector)
-        elements.forEach(element => element.remove())
-      })
-    })
-
-    print('Tüm dialog ve overlay elementleri DOM\'dan kaldırıldı.')
-    await sleep(1)
-  }
-
   // Çerezleri yükle
   if (fs.existsSync(COOKIES_PATH)) {
     const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf8'))
@@ -97,15 +70,13 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
   await page.waitForSelector('input[name="user"]', { timeout: 0 }) // Username input alanını bekle
   await page.type('input[name="user"]', randomUsername) // Rastgele Username yaz
 
-  print(`Username input alanına şu değer yazıldı: ${randomUsername}`)
-  await removeAdsAndElements()
+  print(`OpenVPN Username: ${randomUsername}`)
 
   // Password inputunu bekle ve rastgele metni yaz
   await page.waitForSelector('input[name="pass"]', { timeout: 0 }) // Password input alanını bekle
   await page.type('input[name="pass"]', randomPassword) // Rastgele Password yaz
 
-  print(`Password input alanına şu değer yazıldı: ${randomPassword}`)
-  await removeAdsAndElements()
+  print(`OpenVPN Password: ${randomPassword}`)
 
   // Manuel reCAPTCHA çözme sürecine devam et
   print('Lütfen reCAPTCHA\'yı manuel olarak çözün ve butona tıklayın')
@@ -129,7 +100,6 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
   print('Download Config V2 udp-2500.ovpn butonuna tıklandı!')
 
   await sleep(2)
-  await removeAdsAndElements()
 
   // "Download Config V2 tcp-2501.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]', { timeout: 0 })
@@ -137,7 +107,6 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
   print('Download Config V2 tcp-2501.ovpn butonuna tıklandı!')
 
   await sleep(2)
-  await removeAdsAndElements()
   print(`Dosyalar "${downloadPath}" dizinine indirildi.`)
 
   openDownloadsFolder(downloadPath)
