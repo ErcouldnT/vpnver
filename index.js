@@ -58,11 +58,13 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
     waitUntil: 'networkidle2', // Sayfa tamamen yüklenene kadar bekle
   })
 
+  // Bugünün tarihini "DDMMYYYY" formatında oluştur
+  const today = new Date()
+  const randomUsername = `${today.getDate().toString().padStart(2, '0')}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getFullYear()}`
   // Rastgele 7 haneli bir karakter dizisi oluştur
-  const randomUsername = Math.random().toString(36).substring(2, 9)
   const randomPassword = Math.random().toString(36).substring(2, 9)
 
-  // Username inputunu bekle ve rastgele metni yaz
+  // Username inputunu bekle ve güncel tarihi yaz
   await page.waitForSelector('input[name="user"]', { timeout: 0 })
   await page.type('input[name="user"]', randomUsername)
   print(`OpenVPN Username: ${randomUsername}`)
@@ -87,13 +89,13 @@ const DOWNLOAD_PATH = path.resolve(__dirname, 'Downloads'); // İndirme klasör�
   // "Download Config V2 udp-2500.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="udp-2500"]')
-  print('udp-2500.ovpn indiriliyor...')
+  print(`${randomUsername}-${serverArg}.vpnjantit-udp-2500.ovpn indiriliyor...`)
   await sleep(1)
 
   // "Download Config V2 tcp-2501.ovpn" butonuna tıkla
   await page.waitForSelector('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]', { timeout: 0 })
   await page.click('a.btn.btn-primary.d-block.px-7.mb-4[href^="download-openvpn-v2.php"][href*="tcp-2501"]')
-  print('tcp-2501.ovpn indiriliyor...')
+  print(`${randomUsername}-${serverArg}.vpnjantit-tcp-2501.ovpn indiriliyor...`)
   await sleep(1)
 
   // İndirilen dosyaları göster
@@ -109,7 +111,7 @@ function sleep(second) {
   return new Promise(resolve => setTimeout(resolve, second * 1000))
 }
 
-// Konsola mesaj yazdır
+// Terminale mesaj yazdır
 function print(message) {
   console.warn(`[vpnver] ${message}`)
 }
